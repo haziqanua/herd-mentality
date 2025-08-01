@@ -45,18 +45,21 @@
                 <div class="bg-gray-100 rounded-xl p-6 shadow-inner w-full md:w-1/2">
                     <p class="text-xl font-semibold mb-2">Enter your name:</p>
                     <input type="text" id="player-name-input" placeholder="Your name" class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:outline-none focus:border-green-500 transition duration-300 shadow-md">
+                    <div class="mt-4 flex items-center">
+                        <input type="checkbox" id="host-only-checkbox" class="form-checkbox h-5 w-5 text-green-600">
+                        <label for="host-only-checkbox" class="ml-2 text-gray-700 font-medium">Host only (do not play)</label>
+                    </div>
                     <p class="mt-4 text-gray-600 text-sm">Your internal ID is: <span id="user-id" class="font-mono text-sm bg-gray-200 px-2 py-1 rounded-md"></span></p>
                 </div>
                 <div class="flex-grow w-full md:w-1/2 flex flex-col space-y-4">
-                    <button id="create-game-btn" class="bg-green-500 text-white text-xl font-bold py-4 px-6 rounded-xl hover:bg-green-600 transition duration-300 shadow-lg">Create New Game</button>
+                    <button id="create-game-btn" class="bg-green-500 text-white text-xl font-bold py-4 px-6 rounded-xl hover:bg-green-600 transition duration-300 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed" disabled>Create New Game</button>
                     <div class="flex flex-col space-y-2">
                         <input id="join-game-id-input" type="text" placeholder="Enter 4-letter Game ID to Join" class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:outline-none focus:border-green-500 transition duration-300 shadow-md">
-                        <button id="join-game-btn" class="bg-blue-500 text-white text-xl font-bold py-4 px-6 rounded-xl hover:bg-blue-600 transition duration-300 shadow-lg">Join Existing Game</button>
+                        <button id="join-game-btn" class="bg-blue-500 text-white text-xl font-bold py-4 px-6 rounded-xl hover:bg-blue-600 transition duration-300 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed" disabled>Join Existing Game</button>
                     </div>
                 </div>
             </div>
             
-            <!-- New game ID display section -->
             <div id="game-id-display" class="w-full flex flex-col items-center space-y-4 hidden">
                 <p class="text-xl font-semibold">Your Game ID: <span id="lobby-game-id" class="font-mono text-lg bg-gray-200 px-3 py-1 rounded-md"></span></p>
                 <button id="copy-game-id-btn" class="bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-xl hover:bg-gray-400 transition duration-300">
@@ -69,50 +72,54 @@
                 <h3 class="text-2xl font-bold mb-4 text-gray-800">Players in Lobby</h3>
                 <ul id="player-list" class="space-y-2"></ul>
                 <div id="start-game-section" class="mt-6 flex justify-center hidden">
-                    <button id="start-game-btn" class="bg-yellow-500 text-white text-xl font-bold py-4 px-6 rounded-xl hover:bg-yellow-600 transition duration-300 shadow-lg">Start Game</button>
+                    <button id="start-game-btn" class="bg-yellow-500 text-white text-xl font-bold py-4 px-6 rounded-xl hover:bg-yellow-600 transition duration-300 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed" disabled>Start Game</button>
                 </div>
             </div>
         </div>
 
-        <!-- Game Screen -->
-        <div id="game-screen" class="w-full flex flex-col items-center space-y-6 hidden">
-            <div class="bg-yellow-50 rounded-xl p-6 shadow-inner w-full">
-                <p class="text-xl font-bold mb-2">Game ID: <span id="current-game-id" class="font-mono text-lg text-gray-600"></span></p>
-                <div id="current-question-container" class="text-center">
-                    <h2 class="text-3xl font-extrabold text-gray-800 mb-4">Question:</h2>
-                    <p id="current-question" class="text-2xl font-semibold text-gray-700"></p>
+        <!-- Main Game Screen Content -->
+        <div id="game-content" class="w-full flex flex-col items-center space-y-6 hidden">
+            <!-- Game Screen -->
+            <div id="game-screen" class="w-full flex flex-col items-center space-y-6">
+                <div class="bg-yellow-50 rounded-xl p-6 shadow-inner w-full">
+                    <p class="text-xl font-bold mb-2">Game ID: <span id="current-game-id" class="font-mono text-lg text-gray-600"></span></p>
+                    <div id="current-question-container" class="text-center">
+                        <h2 class="text-3xl font-extrabold text-gray-800 mb-4">Question:</h2>
+                        <p id="current-question" class="text-2xl font-semibold text-gray-700"></p>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Answer Input Section -->
-            <div id="answer-section" class="w-full">
-                <label for="player-answer" class="block text-xl font-semibold text-gray-800 mb-2">Your Answer:</label>
-                <div class="flex flex-col space-y-4">
-                    <input type="text" id="player-answer" class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:outline-none focus:border-green-500 transition duration-300 shadow-md" placeholder="Write your answer here...">
-                    <button id="submit-answer-btn" class="bg-green-500 text-white text-xl font-bold py-4 px-6 rounded-xl hover:bg-green-600 transition duration-300 shadow-lg">Submit Answer</button>
+                <!-- Answer Input Section -->
+                <div id="answer-section" class="w-full">
+                    <label for="player-answer" class="block text-xl font-semibold text-gray-800 mb-2">Your Answer:</label>
+                    <div class="flex flex-col space-y-4">
+                        <input type="text" id="player-answer" class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:outline-none focus:border-green-500 transition duration-300 shadow-md" placeholder="Write your answer here...">
+                        <button id="submit-answer-btn" class="bg-green-500 text-white text-xl font-bold py-4 px-6 rounded-xl hover:bg-green-600 transition duration-300 shadow-lg">Submit Answer</button>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Reveal Answer Section -->
-            <div id="reveal-section" class="w-full hidden flex flex-col items-center space-y-4">
-                <h3 class="text-2xl font-bold text-gray-800">Answers submitted!</h3>
-                <button id="reveal-answers-btn" class="bg-blue-500 text-white text-xl font-bold py-4 px-6 rounded-xl hover:bg-blue-600 transition duration-300 shadow-lg">Reveal Answers</button>
-            </div>
-
-            <!-- Results Section -->
-            <div id="results-section" class="w-full hidden">
-                <div class="bg-gray-50 rounded-xl p-6 shadow-inner w-full mb-6">
-                    <h3 class="text-2xl font-bold mb-4 text-gray-800 text-center">Round Results</h3>
-                    <div id="answer-tally" class="space-y-4"></div>
+                <!-- Reveal Answer Section -->
+                <div id="reveal-section" class="w-full hidden flex flex-col items-center space-y-4">
+                    <h3 class="text-2xl font-bold text-gray-800">Answers submitted!</h3>
+                    <button id="reveal-answers-btn" class="bg-blue-500 text-white text-xl font-bold py-4 px-6 rounded-xl hover:bg-blue-600 transition duration-300 shadow-lg">Reveal Answers</button>
                 </div>
-                <div class="flex justify-center">
-                    <button id="next-round-btn" class="bg-yellow-500 text-white text-xl font-bold py-4 px-6 rounded-xl hover:bg-yellow-600 transition duration-300 shadow-lg">Next Round</button>
+
+                <!-- Results Section -->
+                <div id="results-section" class="w-full hidden">
+                    <div class="bg-gray-50 rounded-xl p-6 shadow-inner w-full mb-6">
+                        <h3 class="text-2xl font-bold mb-4 text-gray-800 text-center">Round Results</h3>
+                        <div id="answer-tally" class="space-y-4"></div>
+                    </div>
+                    <div class="flex justify-center space-x-4">
+                        <button id="next-round-btn" class="bg-yellow-500 text-white text-xl font-bold py-4 px-6 rounded-xl hover:bg-yellow-600 transition duration-300 shadow-lg">Next Round</button>
+                        <button id="end-game-btn" class="bg-red-500 text-white text-xl font-bold py-4 px-6 rounded-xl hover:bg-red-600 transition duration-300 shadow-lg hidden">End Game</button>
+                    </div>
                 </div>
             </div>
 
             <!-- Scoreboard -->
-            <div class="bg-gray-50 rounded-xl p-6 shadow-inner w-full">
-                <h3 class="text-2xl font-bold mb-4 text-gray-800">Scoreboard</h3>
+            <div id="scoreboard-container" class="bg-gray-50 rounded-xl p-6 shadow-inner w-full">
+                <h3 id="scoreboard-title" class="text-2xl font-bold mb-4 text-gray-800">Scoreboard</h3>
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-100">
                         <tr>
@@ -126,9 +133,9 @@
                     </tbody>
                 </table>
             </div>
-
+            
             <!-- Game Over Screen -->
-            <div id="game-over-screen" class="w-full hidden flex flex-col items-center space-y-4">
+            <div id="game-over-screen" class="w-full flex flex-col items-center space-y-4 hidden">
                 <h2 class="text-4xl font-extrabold text-green-600">Game Over!</h2>
                 <p id="winner-message" class="text-2xl text-center font-semibold text-gray-700"></p>
                 <button id="play-again-btn" class="bg-green-500 text-white text-xl font-bold py-4 px-6 rounded-xl hover:bg-green-600 transition duration-300 shadow-lg">Play Again</button>
@@ -138,18 +145,24 @@
 
     <!-- Firebase SDKs -->
     <script type="module">
-        // It's recommended to use the latest stable version of the Firebase SDKs.
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // IMPORTANT: The following global variables are provided by the canvas environment.
-        // DO NOT change their names.
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        // IMPORTANT: For local deployment, you MUST replace these placeholders
+        // with your own Firebase configuration.
+        const firebaseConfig = {
+            apiKey: "AIzaSyAzLVJlX4hK8-vq_zHQrQsY8d6Sg8QFqnE",
+            authDomain: "herd-mentality-f089b.firebaseapp.com",
+            projectId: "herd-mentality-f089b",
+            storageBucket: "herd-mentality-f089b.firebasestorage.app",
+            messagingSenderId: "1052545056071",
+            appId: "1:1052545056071:web:e5a314ff28f827bd616062",
+            measurementId: "G-PP3Q3P74C5"
+        };
+        
+        const appId = firebaseConfig.appId;
 
-        // Global variables for Firebase services and game state
         let db;
         let auth;
         let userId;
@@ -160,9 +173,12 @@
         const statusMessageEl = document.getElementById('status-message');
         const errorMessageEl = document.getElementById('error-message');
         const lobbyScreenEl = document.getElementById('lobby-screen');
+        const gameContentEl = document.getElementById('game-content');
         const gameScreenEl = document.getElementById('game-screen');
+        const gameOverScreenEl = document.getElementById('game-over-screen');
         const userIdEl = document.getElementById('user-id');
         const playerNameInputEl = document.getElementById('player-name-input');
+        const hostOnlyCheckboxEl = document.getElementById('host-only-checkbox');
         const playerListEl = document.getElementById('player-list');
         const currentQuestionEl = document.getElementById('current-question');
         const playerAnswerEl = document.getElementById('player-answer');
@@ -170,21 +186,23 @@
         const revealBtnEl = document.getElementById('reveal-answers-btn');
         const nextRoundBtnEl = document.getElementById('next-round-btn');
         const scoreboardBodyEl = document.getElementById('scoreboard-body');
-        const gameOverScreenEl = document.getElementById('game-over-screen');
         const winnerMessageEl = document.getElementById('winner-message');
         const revealSectionEl = document.getElementById('reveal-section');
-        const resultsSectionEl = document.getElementById('answer-section');
+        const resultsSectionEl = document.getElementById('results-section');
         const answerSectionEl = document.getElementById('answer-section');
         const answerTallyEl = document.getElementById('answer-tally');
         const startGameSectionEl = document.getElementById('start-game-section');
+        const scoreboardContainerEl = document.getElementById('scoreboard-container');
 
-        // New elements for the lobby game ID display
+        const createGameBtn = document.getElementById('create-game-btn');
+        const joinGameBtn = document.getElementById('join-game-btn');
         const gameIdDisplayEl = document.getElementById('game-id-display');
         const lobbyGameIdEl = document.getElementById('lobby-game-id');
         const joinGameIdInputEl = document.getElementById('join-game-id-input');
         const copyGameIdBtnEl = document.getElementById('copy-game-id-btn');
+        const startGameBtn = document.getElementById('start-game-btn');
+        const endGameBtn = document.getElementById('end-game-btn');
 
-        // Senarai soalan (Questions list - kept in Malay)
         const questions = [
             "Benda apa yang selalu hilang?",
             "Filem apa yang semua orang patut tonton?",
@@ -248,7 +266,6 @@
             "Tempat yang paling ramai orang pergi?"
         ];
         
-        // Helper function to generate a random 4-letter ID
         function generateShortId() {
             const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
             let result = '';
@@ -258,64 +275,64 @@
             return result;
         }
 
-        // --- Firebase and Authentication Initialization ---
         async function setupFirebase() {
             try {
-                if (!firebaseConfig || Object.keys(firebaseConfig).length === 0) {
-                    throw new Error("Firebase configuration is missing or empty.");
+                if (!firebaseConfig || Object.keys(firebaseConfig).length === 0 || firebaseConfig.apiKey === "YOUR_API_KEY") {
+                    throw new Error("Firebase configuration is missing or empty. Please replace the placeholder values.");
                 }
 
                 const app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
+                
+                await signInAnonymously(auth);
 
-                // Wait for the auth state to be ready
                 await new Promise((resolve) => {
-                    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+                    const unsubscribe = onAuthStateChanged(auth, (user) => {
                         if (user) {
                             userId = user.uid;
-                        } else {
-                            if (initialAuthToken) {
-                                await signInWithCustomToken(auth, initialAuthToken);
-                            } else {
-                                await signInAnonymously(auth);
-                            }
-                            userId = auth.currentUser.uid;
+                            isAuthReady = true;
+                            unsubscribe();
+                            resolve();
                         }
-                        isAuthReady = true;
-                        unsubscribe(); // Stop listening after the first state change
-                        resolve();
                     });
                 });
                 
                 statusMessageEl.textContent = "Connected to the pen! Ready to play.";
                 userIdEl.textContent = userId;
+                createGameBtn.disabled = false;
+                joinGameBtn.disabled = false;
+                
                 showLobby();
+                console.log("Firebase setup complete. Game is ready.");
             } catch (e) {
                 console.error("Firebase setup failed: ", e);
-                errorMessageEl.textContent = "Error connecting to Firebase. Please check the console for details.";
+                errorMessageEl.textContent = `Error connecting to Firebase: ${e.message}. Please check the console and your Firebase configuration.`;
                 errorMessageEl.classList.remove('hidden');
                 statusMessageEl.classList.add('hidden');
             }
         }
         
-        // --- Game State and UI Updates ---
         function showLobby() {
             lobbyScreenEl.classList.remove('hidden');
-            gameScreenEl.classList.add('hidden');
+            gameContentEl.classList.add('hidden');
             gameOverScreenEl.classList.add('hidden');
         }
 
         function showGame() {
             lobbyScreenEl.classList.add('hidden');
+            gameContentEl.classList.remove('hidden');
             gameScreenEl.classList.remove('hidden');
             gameOverScreenEl.classList.add('hidden');
+            scoreboardContainerEl.classList.remove('hidden');
         }
 
-        function showGameOver(winnerName) {
+        function showGameOver() {
+            lobbyScreenEl.classList.add('hidden');
+            gameContentEl.classList.remove('hidden');
             gameScreenEl.classList.add('hidden');
             gameOverScreenEl.classList.remove('hidden');
-            winnerMessageEl.textContent = `${winnerName} is the champion of the herd!`;
+            scoreboardContainerEl.classList.remove('hidden');
         }
         
         function validateName() {
@@ -334,12 +351,13 @@
             const playerName = validateName();
             if (!playerName) return;
 
+            const isHostOnly = hostOnlyCheckboxEl.checked;
+            
             const newGameRef = doc(collection(db, `artifacts/${appId}/public/data/games`));
             const newGameId = newGameRef.id;
             let shortId;
             let shortIdRef;
 
-            // Generate a unique 4-letter ID
             let isUnique = false;
             let retries = 0;
             const maxRetries = 10;
@@ -359,20 +377,21 @@
                 return;
             }
 
+            const players = isHostOnly ? {} : { [userId]: { name: playerName, score: 0, pinkCowCount: 0 } };
+
             const initialGameState = {
-                players: { [userId]: { name: playerName, score: 0, pinkCow: false } },
+                players: players,
                 hostId: userId,
                 round: 0,
                 status: 'lobby',
                 answers: {},
                 question: null,
                 shortId: shortId,
+                currentPinkCowHolderId: null,
             };
 
             try {
-                // Save the new game state
                 await setDoc(newGameRef, initialGameState);
-                // Create a mapping from shortId to the long Firestore ID
                 await setDoc(shortIdRef, { longId: newGameId });
                 
                 currentGameId = newGameId;
@@ -420,7 +439,7 @@
                     if (newPlayers[userId]) {
                         newPlayers[userId].name = playerName;
                     } else {
-                        newPlayers[userId] = { name: playerName, score: 0, pinkCow: false };
+                        newPlayers[userId] = { name: playerName, score: 0, pinkCowCount: 0 };
                     }
                     
                     await setDoc(gameRef, { players: newPlayers }, { merge: true });
@@ -459,7 +478,6 @@
         function updateUI(gameData) {
             isHost = gameData.hostId === userId;
             
-            // Use the short ID for display
             if (gameData.shortId) {
                 document.getElementById('current-game-id').textContent = gameData.shortId;
                 lobbyGameIdEl.textContent = gameData.shortId;
@@ -473,6 +491,12 @@
                 if (isHost && gameData.shortId) {
                     gameIdDisplayEl.classList.remove('hidden');
                     startGameSectionEl.classList.remove('hidden');
+                    const playerCount = Object.keys(gameData.players).length;
+                    if (playerCount > 2) {
+                        startGameBtn.disabled = false;
+                    } else {
+                        startGameBtn.disabled = true;
+                    }
                 } else if (gameData.shortId) {
                     gameIdDisplayEl.classList.add('hidden');
                 } else {
@@ -482,7 +506,12 @@
                 showGame();
                 currentQuestionEl.textContent = gameData.question;
                 
-                answerSectionEl.classList.remove('hidden');
+                if (gameData.players[userId]) {
+                    answerSectionEl.classList.remove('hidden');
+                } else {
+                    answerSectionEl.classList.add('hidden');
+                }
+                
                 revealSectionEl.classList.add('hidden');
                 resultsSectionEl.classList.add('hidden');
                 
@@ -509,17 +538,36 @@
                 displayRoundResults(gameData);
                 if (isHost) {
                     nextRoundBtnEl.classList.remove('hidden');
+                    endGameBtn.classList.remove('hidden');
+                } else {
+                    nextRoundBtnEl.classList.add('hidden');
+                    endGameBtn.classList.add('hidden');
                 }
             } else if (gameData.status === 'game_over') {
-                const winnerId = Object.keys(gameData.players).find(pId => {
+                showGameOver();
+                updateScoreboard(gameData.players, gameData.currentPinkCowHolderId);
+                document.getElementById('scoreboard-title').textContent = "Final Leaderboard";
+                
+                const potentialWinners = Object.keys(gameData.players).filter(pId => {
                     const player = gameData.players[pId];
-                    return player.score >= 8 && !player.pinkCow;
+                    return player.score >= 8 && pId !== gameData.currentPinkCowHolderId;
                 });
-                const winnerName = gameData.players[winnerId]?.name;
-                showGameOver(winnerName || "No winner!");
+                
+                if (potentialWinners.length === 1) {
+                    const winnerName = gameData.players[potentialWinners[0]].name;
+                    winnerMessageEl.textContent = `${winnerName} is the champion of the herd!`;
+                } else if (potentialWinners.length > 1) {
+                    const winnerNames = potentialWinners.map(pId => gameData.players[pId].name).join(' and ');
+                    winnerMessageEl.textContent = `It's a tie! Congratulations to ${winnerNames}!`;
+                } else {
+                    winnerMessageEl.textContent = "Game Over! The herd couldn't decide on a champion.";
+                }
             }
 
-            updateScoreboard(gameData.players);
+            if (gameData.status !== 'game_over') {
+                updateScoreboard(gameData.players, gameData.currentPinkCowHolderId);
+                document.getElementById('scoreboard-title').textContent = "Scoreboard";
+            }
         }
         
         async function startGame() {
@@ -560,6 +608,17 @@
                 console.error("Error starting new round: ", e);
             }
         }
+
+        async function endGameManually() {
+            if (!isHost) return;
+            const gameRef = doc(db, `artifacts/${appId}/public/data/games/${currentGameId}`);
+            
+            try {
+                await setDoc(gameRef, { status: 'game_over' }, { merge: true });
+            } catch (e) {
+                console.error("Error ending game manually: ", e);
+            }
+        }
         
         async function submitAnswer() {
             const answer = playerAnswerEl.value.trim();
@@ -588,11 +647,11 @@
             const gameSnap = await getDoc(gameRef);
             const gameData = gameSnap.data();
             
-            const answers = Object.values(gameData.answers);
+            const answers = gameData.answers;
             const players = gameData.players;
 
             const answerCounts = {};
-            answers.forEach(answer => {
+            Object.values(answers).forEach(answer => {
                 const normalizedAnswer = answer.toLowerCase();
                 answerCounts[normalizedAnswer] = (answerCounts[normalizedAnswer] || 0) + 1;
             });
@@ -611,17 +670,18 @@
                 }
             }
 
-            const oddOnesOut = Object.keys(gameData.answers).filter(pId => {
-                const answer = gameData.answers[pId];
-                return answerCounts[answer.toLowerCase()] === 1;
+            const oddOnesOut = Object.keys(answers).filter(pId => {
+                const playerAnswer = answers[pId];
+                return answerCounts[playerAnswer.toLowerCase()] === 1;
             });
             
             const newPlayers = JSON.parse(JSON.stringify(players));
-            let gameWinner = null;
+            let newCurrentPinkCowHolderId = gameData.currentPinkCowHolderId;
+            let gameWinner = false;
             
             if (!tiedMajority) {
                 Object.keys(newPlayers).forEach(pId => {
-                    const playerAnswer = gameData.answers[pId];
+                    const playerAnswer = answers[pId];
                     if (playerAnswer && playerAnswer.toLowerCase() === majorityAnswer) {
                         newPlayers[pId].score += 1;
                     }
@@ -630,22 +690,24 @@
 
             if (oddOnesOut.length === 1) {
                 const pinkCowHolderId = oddOnesOut[0];
-                Object.keys(newPlayers).forEach(pId => {
-                    newPlayers[pId].pinkCow = (pId === pinkCowHolderId);
-                });
+                newPlayers[pinkCowHolderId].pinkCowCount += 1;
+                newCurrentPinkCowHolderId = pinkCowHolderId;
             }
             
-            Object.keys(newPlayers).forEach(pId => {
+            const potentialWinners = Object.keys(newPlayers).filter(pId => {
                 const player = newPlayers[pId];
-                if (player.score >= 8 && !player.pinkCow) {
-                    gameWinner = pId;
-                }
+                return player.score >= 8 && pId !== newCurrentPinkCowHolderId;
             });
+
+            if (potentialWinners.length >= 1) {
+                gameWinner = true;
+            }
             
             try {
                 await setDoc(gameRef, {
                     status: gameWinner ? 'game_over' : 'revealing',
                     players: newPlayers,
+                    currentPinkCowHolderId: newCurrentPinkCowHolderId,
                 }, { merge: true });
             } catch (e) {
                 console.error("Error revealing answers: ", e);
@@ -659,48 +721,60 @@
             
             const groupedAnswers = {};
             for (const pId in answers) {
-                const answerText = answers[pId];
-                if (!groupedAnswers[answerText]) {
-                    groupedAnswers[answerText] = [];
+                const normalizedAnswer = answers[pId].toLowerCase();
+                if (!groupedAnswers[normalizedAnswer]) {
+                    groupedAnswers[normalizedAnswer] = {
+                        originalAnswer: answers[pId],
+                        players: [],
+                    };
                 }
-                groupedAnswers[answerText].push(playerNames[pId].name);
+                groupedAnswers[normalizedAnswer].players.push(playerNames[pId].name);
             }
             
-            const sortedAnswers = Object.entries(groupedAnswers).sort((a, b) => b[1].length - a[1].length);
+            const sortedAnswers = Object.values(groupedAnswers).sort((a, b) => b.players.length - a.players.length);
 
-            sortedAnswers.forEach(([answer, players]) => {
-                const isMajority = players.length === sortedAnswers[0][1].length;
+            sortedAnswers.forEach(({ originalAnswer, players }) => {
+                const isMajority = players.length === sortedAnswers[0].players.length;
                 const isOddOneOut = players.length === 1;
                 
                 const resultText = document.createElement('div');
                 resultText.className = "p-4 border-2 rounded-xl shadow-md transition-all duration-300 transform hover:scale-105";
                 
-                if (isMajority && (!sortedAnswers[1] || sortedAnswers[1][1].length < players.length)) {
+                if (isMajority && (!sortedAnswers[1] || sortedAnswers[1].players.length < players.length)) {
                     resultText.classList.add('bg-green-100', 'border-green-400');
-                    resultText.innerHTML = `<p class="text-xl font-bold text-green-700 flex items-center gap-2"><i class="fas fa-check-circle"></i> "${answer}"</p><p class="mt-2 text-lg text-green-600">Matched by: ${players.join(', ')}</p>`;
+                    resultText.innerHTML = `<p class="text-xl font-bold text-green-700 flex items-center gap-2"><i class="fas fa-check-circle"></i> "${originalAnswer}"</p><p class="mt-2 text-lg text-green-600">Matched by: ${players.join(', ')}</p>`;
                 } else if (isOddOneOut) {
                     resultText.classList.add('bg-red-100', 'border-red-400');
-                    resultText.innerHTML = `<p class="text-xl font-bold text-red-700 flex items-center gap-2"><i class="fas fa-times-circle"></i> "${answer}"</p><p class="mt-2 text-lg text-red-600">The Odd One Out: ${players.join(', ')}</p>`;
+                    resultText.innerHTML = `<p class="text-xl font-bold text-red-700 flex items-center gap-2"><i class="fas fa-times-circle"></i> "${originalAnswer}"</p><p class="mt-2 text-lg text-red-600">The Odd One Out: ${players.join(', ')}</p>`;
                 } else {
                     resultText.classList.add('bg-gray-100', 'border-gray-400');
-                    resultText.innerHTML = `<p class="text-xl font-bold text-gray-700 flex items-center gap-2"><i class="fas fa-minus-circle"></i> "${answer}"</p><p class="mt-2 text-lg text-gray-600">Matched by: ${players.join(', ')}</p>`;
+                    resultText.innerHTML = `<p class="text-xl font-bold text-gray-700 flex items-center gap-2"><i class="fas fa-minus-circle"></i> "${originalAnswer}"</p><p class="mt-2 text-lg text-gray-600">Matched by: ${players.join(', ')}</p>`;
                 }
                 answerTallyEl.appendChild(resultText);
             });
         }
 
-        function updateScoreboard(players) {
+        function updateScoreboard(players, currentPinkCowHolderId) {
             scoreboardBodyEl.innerHTML = "";
-            const sortedPlayers = Object.values(players).sort((a, b) => b.score - a.score);
+            const sortedPlayerIds = Object.keys(players).sort((a, b) => players[b].score - players[a].score);
             
-            sortedPlayers.forEach(player => {
+            sortedPlayerIds.forEach(pId => {
+                const player = players[pId];
+                const isCurrentPinkCowHolder = pId === currentPinkCowHolderId;
+                
                 const row = document.createElement('tr');
-                row.className = "border-b border-gray-200";
+                let rowClasses = "border-b border-gray-200";
+                
+                if (isCurrentPinkCowHolder) {
+                    rowClasses += " bg-pink-100 font-semibold";
+                }
+                row.className = rowClasses;
+                
                 row.innerHTML = `
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${player.name}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-500">${player.score}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-center text-sm">
-                        ${player.pinkCow ? '<i class="fas fa-cow pink-cow-icon"></i>' : ''}
+                        ${isCurrentPinkCowHolder ? `<i class="fas fa-cow pink-cow-icon"></i> ${player.pinkCowCount}` : `${player.pinkCowCount}`}
                     </td>
                 `;
                 scoreboardBodyEl.appendChild(row);
@@ -708,28 +782,60 @@
         }
         
         function copyToClipboard(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                // User notification
-                const originalText = event.target.textContent;
-                event.target.textContent = 'Copied!';
-                setTimeout(() => {
-                    event.target.textContent = originalText;
-                }, 1500);
-            }).catch(err => {
-                console.error('Failed to copy text: ', err);
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(() => {
+                    const originalText = event.target.textContent;
+                    event.target.textContent = 'Copied!';
+                    setTimeout(() => {
+                        event.target.textContent = originalText;
+                    }, 1500);
+                }).catch(err => {
+                    console.error('Failed to copy text with Clipboard API: ', err);
+                    fallbackCopyTextToClipboard(text);
+                });
+            } else {
+                fallbackCopyTextToClipboard(text);
+            }
+        }
+        
+        function fallbackCopyTextToClipboard(text) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            
+            textArea.style.position = "fixed";
+            textArea.style.top = "-9999px";
+            textArea.style.left = "-9999px";
+
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    const originalText = event.target.textContent;
+                    event.target.textContent = 'Copied!';
+                    setTimeout(() => {
+                        event.target.textContent = originalText;
+                    }, 1500);
+                } else {
+                    errorMessageEl.textContent = "Failed to copy. Please copy manually.";
+                    errorMessageEl.classList.remove('hidden');
+                    setTimeout(() => errorMessageEl.classList.add('hidden'), 3000);
+                }
+            } catch (err) {
+                console.error('Fallback: Oops, unable to copy', err);
                 errorMessageEl.textContent = "Failed to copy. Please copy manually.";
                 errorMessageEl.classList.remove('hidden');
                 setTimeout(() => errorMessageEl.classList.add('hidden'), 3000);
-            });
+            }
+
+            document.body.removeChild(textArea);
         }
 
         setupFirebase();
 
-        // --- Event Listeners ---
         document.addEventListener('DOMContentLoaded', () => {
-            const createGameBtn = document.getElementById('create-game-btn');
-            const joinGameBtn = document.getElementById('join-game-btn');
-            const startGameBtn = document.getElementById('start-game-btn');
             const submitAnswerBtn = document.getElementById('submit-answer-btn');
             const revealAnswersBtn = document.getElementById('reveal-answers-btn');
             const nextRoundBtn = document.getElementById('next-round-btn');
@@ -745,6 +851,7 @@
             if (copyGameIdBtnEl) copyGameIdBtnEl.addEventListener('click', () => {
                 copyToClipboard(lobbyGameIdEl.textContent);
             });
+            if (endGameBtn) endGameBtn.addEventListener('click', endGameManually);
         });
     </script>
 </body>
