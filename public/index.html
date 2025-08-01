@@ -528,7 +528,11 @@
                     playerAnswerEl.disabled = false;
                     submitBtnEl.disabled = false;
                     submitBtnEl.textContent = "Submit Answer";
-                    playerAnswerEl.value = "";
+                    
+                    // Only clear the input box if no one has submitted an answer yet.
+                    if (Object.keys(gameData.answers).length === 0) {
+                       playerAnswerEl.value = "";
+                    }
                 }
             } else if (gameData.status === 'revealing') {
                 showGame();
