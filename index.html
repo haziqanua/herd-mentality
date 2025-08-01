@@ -35,7 +35,7 @@
         <p class="text-xl text-center text-gray-600 font-semibold mb-6">Think like the herd to win!</p>
 
         <!-- Loading and Error Messages -->
-        <div id="status-message" class="text-center font-medium text-lg text-gray-700">Connecting to the barn...</div>
+        <div id="status-message" class="text-center font-medium text-lg text-gray-700">Connecting to the pen...</div>
         <div id="error-message" class="text-center font-bold text-red-500 hidden"></div>
 
         <!-- Lobby Screen -->
@@ -48,13 +48,23 @@
                     <p class="mt-4 text-gray-600 text-sm">Your internal ID is: <span id="user-id" class="font-mono text-sm bg-gray-200 px-2 py-1 rounded-md"></span></p>
                 </div>
                 <div class="flex-grow w-full md:w-1/2 flex flex-col space-y-4">
-                    <button id="create-game-btn" class="bg-green-500 text-white text-xl font-bold py-4 px-6 rounded-xl hover:bg-green-600 transition duration-300 shadow-lg">Create a New Game</button>
+                    <button id="create-game-btn" class="bg-green-500 text-white text-xl font-bold py-4 px-6 rounded-xl hover:bg-green-600 transition duration-300 shadow-lg">Create New Game</button>
                     <div class="flex flex-col space-y-2">
-                        <input id="join-game-id" type="text" placeholder="Enter a Game ID to Join" class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:outline-none focus:border-green-500 transition duration-300 shadow-md">
+                        <input id="join-game-id-input" type="text" placeholder="Enter 4-letter Game ID to Join" class="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:outline-none focus:border-green-500 transition duration-300 shadow-md">
                         <button id="join-game-btn" class="bg-blue-500 text-white text-xl font-bold py-4 px-6 rounded-xl hover:bg-blue-600 transition duration-300 shadow-lg">Join Existing Game</button>
                     </div>
                 </div>
             </div>
+            
+            <!-- New game ID display section -->
+            <div id="game-id-display" class="w-full flex flex-col items-center space-y-4 hidden">
+                <p class="text-xl font-semibold">Your Game ID: <span id="lobby-game-id" class="font-mono text-lg bg-gray-200 px-3 py-1 rounded-md"></span></p>
+                <button id="copy-game-id-btn" class="bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-xl hover:bg-gray-400 transition duration-300">
+                    <i class="fas fa-copy mr-2"></i> Copy ID
+                </button>
+                <p class="text-gray-600">Share this ID with your friends so they can join.</p>
+            </div>
+
             <div id="player-list-container" class="bg-gray-50 rounded-xl p-6 mt-6 w-full shadow-inner">
                 <h3 class="text-2xl font-bold mb-4 text-gray-800">Players in Lobby</h3>
                 <ul id="player-list" class="space-y-2"></ul>
@@ -83,9 +93,9 @@
                 </div>
             </div>
 
-            <!-- Reveal Section -->
+            <!-- Reveal Answer Section -->
             <div id="reveal-section" class="w-full hidden flex flex-col items-center space-y-4">
-                <h3 class="text-2xl font-bold text-gray-800">Answers are in!</h3>
+                <h3 class="text-2xl font-bold text-gray-800">Answers submitted!</h3>
                 <button id="reveal-answers-btn" class="bg-blue-500 text-white text-xl font-bold py-4 px-6 rounded-xl hover:bg-blue-600 transition duration-300 shadow-lg">Reveal Answers</button>
             </div>
 
@@ -117,7 +127,7 @@
                 </table>
             </div>
 
-            <!-- Game Over Section -->
+            <!-- Game Over Screen -->
             <div id="game-over-screen" class="w-full hidden flex flex-col items-center space-y-4">
                 <h2 class="text-4xl font-extrabold text-green-600">Game Over!</h2>
                 <p id="winner-message" class="text-2xl text-center font-semibold text-gray-700"></p>
@@ -167,22 +177,87 @@
         const answerTallyEl = document.getElementById('answer-tally');
         const startGameSectionEl = document.getElementById('start-game-section');
 
-        // Hardcoded list of questions
-        const questions = [
-            "What's a food that is hard to juggle?",
-            "Name an animal you wouldn't want to find in your bathtub.",
-            "What's the best pizza topping?",
-            "Name a movie everyone should see.",
-            "What is the most useless superpower?",
-            "What's a popular phrase that is actually quite weird?",
-            "What is a common lie people tell?",
-            "Name a famous person you'd want to be stuck in an elevator with.",
-            "What's the best smell in the world?",
-            "Name a country that is very cold.",
-            "What's a sound that you find annoying?",
-        ];
+        // New elements for the lobby game ID display
+        const gameIdDisplayEl = document.getElementById('game-id-display');
+        const lobbyGameIdEl = document.getElementById('lobby-game-id');
+        const joinGameIdInputEl = document.getElementById('join-game-id-input');
+        const copyGameIdBtnEl = document.getElementById('copy-game-id-btn');
 
-        // --- Firebase Initialization and Authentication ---
+        // Senarai soalan (Questions list - kept in Malay)
+        const questions = [
+            "Benda apa yang selalu hilang?",
+            "Filem apa yang semua orang patut tonton?",
+            "Aktiviti hujung minggu yang paling biasa?",
+            "Haiwan apa yang anda tak nak jumpa dalam bilik mandi?",
+            "Apa topping pizza yang paling sedap?",
+            "Bandar yang paling romantik?",
+            "Satu pekerjaan yang sangat membosankan?",
+            "Satu perkara yang orang selalu berjanji tapi tak buat?",
+            "Rasa aiskrim yang paling popular?",
+            "Suara yang paling menjengkelkan?",
+            "Jenama telefon pintar yang paling popular?",
+            "Superpower yang paling tidak berguna?",
+            "Benda apa yang selalu ada dalam beg tangan?",
+            "Negara yang paling sejuk?",
+            "Warna yang paling menenangkan?",
+            "Benda yang anda selalu lupa?",
+            "Makanan yang paling susah nak dibuang?",
+            "Apa yang anda buat bila bosan?",
+            "Lagu apa yang semua orang tahu?",
+            "Tempat yang paling bagus untuk bercuti?",
+            "Sayur yang paling disukai ramai?",
+            "Bunga yang paling terkenal?",
+            "Sukan apa yang paling susah?",
+            "Filem seram yang paling menakutkan?",
+            "Makanan yang paling sesuai untuk sarapan?",
+            "Jenama kereta yang paling mewah?",
+            "Selebriti yang paling mesra?",
+            "Jenis kopi yang paling popular?",
+            "Benda yang sentiasa ada dalam peti sejuk?",
+            "Watak kartun yang paling ikonik?",
+            "Pakaian yang paling selesa?",
+            "Makanan segera yang paling disukai?",
+            "Negara mana yang terkenal dengan makanan pedas?",
+            "Wira super yang paling kuat?",
+            "Minuman yang paling menyegarkan?",
+            "Hari yang paling sibuk dalam seminggu?",
+            "Makanan pencuci mulut yang paling sedap?",
+            "Aktiviti yang paling menyeronokkan semasa hujan?",
+            "Benda yang paling penting dalam hidup?",
+            "Alat muzik yang paling mudah dipelajari?",
+            "Buah yang paling popular?",
+            "Haiwan peliharaan yang paling sesuai untuk kanak-kanak?",
+            "Tempat yang paling menakutkan?",
+            "Makanan yang paling unik?",
+            "Benda yang anda tak boleh hidup tanpanya?",
+            "Gaya rambut yang paling biasa?",
+            "Raksasa filem yang paling terkenal?",
+            "Makanan yang selalu orang bawa ke parti?",
+            "Benda yang anda buat bila tak ada internet?",
+            "Hobi yang paling popular?",
+            "Apa yang anda akan lakukan jika anda memenangi loteri?",
+            "Satu benda yang orang selalu beli tapi jarang guna?",
+            "Makanan yang paling tak suka?",
+            "Suara yang paling menenangkan?",
+            "Apa yang anda tak patut pakai di majlis perkahwinan?",
+            "Jenama kasut yang paling terkenal?",
+            "Perkataan yang paling kerap anda gunakan?",
+            "Makanan yang paling pedas?",
+            "Apa yang anda akan makan untuk kali terakhir jika anda boleh pilih?",
+            "Tempat yang paling ramai orang pergi?"
+        ];
+        
+        // Helper function to generate a random 4-letter ID
+        function generateShortId() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            let result = '';
+            for (let i = 0; i < 4; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
+
+        // --- Firebase and Authentication Initialization ---
         async function setupFirebase() {
             try {
                 const app = initializeApp(firebaseConfig);
@@ -193,11 +268,10 @@
                     if (user) {
                         userId = user.uid;
                         isAuthReady = true;
-                        statusMessageEl.textContent = "Connected to the barn! Ready to play.";
+                        statusMessageEl.textContent = "Connected to the pen! Ready to play.";
                         userIdEl.textContent = userId;
                         showLobby();
                     } else {
-                        // Sign in with custom token or anonymously if not available
                         if (initialAuthToken) {
                             await signInWithCustomToken(auth, initialAuthToken);
                         } else {
@@ -213,7 +287,7 @@
             }
         }
         
-        // --- Game State Management and UI Updates ---
+        // --- Game State and UI Updates ---
         function showLobby() {
             lobbyScreenEl.classList.remove('hidden');
             gameScreenEl.classList.add('hidden');
@@ -250,7 +324,20 @@
 
             const newGameRef = doc(collection(db, `artifacts/${appId}/public/data/games`));
             const newGameId = newGameRef.id;
-            
+            let shortId;
+            let shortIdRef;
+
+            // Generate a unique 4-letter ID
+            let isUnique = false;
+            do {
+                shortId = generateShortId();
+                shortIdRef = doc(db, `artifacts/${appId}/public/data/shortGameIds/${shortId}`);
+                const shortIdSnap = await getDoc(shortIdRef);
+                if (!shortIdSnap.exists()) {
+                    isUnique = true;
+                }
+            } while (!isUnique);
+
             const initialGameState = {
                 players: { [userId]: { name: playerName, score: 0, pinkCow: false } },
                 hostId: userId,
@@ -258,10 +345,15 @@
                 status: 'lobby',
                 answers: {},
                 question: null,
+                shortId: shortId,
             };
 
             try {
+                // Save the new game state
                 await setDoc(newGameRef, initialGameState);
+                // Create a mapping from shortId to the long Firestore ID
+                await setDoc(shortIdRef, { longId: newGameId });
+                
                 currentGameId = newGameId;
                 isHost = true;
                 listenToGameChanges();
@@ -277,36 +369,42 @@
             const playerName = validateName();
             if (!playerName) return;
 
-            const joinGameId = document.getElementById('join-game-id').value.trim();
-            if (!joinGameId) {
-                errorMessageEl.textContent = "Please enter a valid Game ID.";
+            const joinGameShortId = joinGameIdInputEl.value.trim().toUpperCase();
+            if (!joinGameShortId || joinGameShortId.length !== 4) {
+                errorMessageEl.textContent = "Please enter a valid 4-letter Game ID.";
                 errorMessageEl.classList.remove('hidden');
                 setTimeout(() => errorMessageEl.classList.add('hidden'), 3000);
                 return;
             }
 
             try {
-                const gameRef = doc(db, `artifacts/${appId}/public/data/games/${joinGameId}`);
+                const shortIdRef = doc(db, `artifacts/${appId}/public/data/shortGameIds/${joinGameShortId}`);
+                const shortIdSnap = await getDoc(shortIdRef);
+                
+                if (!shortIdSnap.exists()) {
+                    errorMessageEl.textContent = "Game not found. Please check the ID.";
+                    errorMessageEl.classList.remove('hidden');
+                    setTimeout(() => errorMessageEl.classList.add('hidden'), 3000);
+                    return;
+                }
+
+                const longGameId = shortIdSnap.data().longId;
+                const gameRef = doc(db, `artifacts/${appId}/public/data/games/${longGameId}`);
                 const gameSnap = await getDoc(gameRef);
 
                 if (gameSnap.exists()) {
                     const gameData = gameSnap.data();
                     if (gameData.players[userId]) {
-                        // Player is already in the game, just update their name
                         gameData.players[userId].name = playerName;
                         await setDoc(gameRef, { players: gameData.players }, { merge: true });
-                        currentGameId = joinGameId;
-                        isHost = gameData.hostId === userId;
-                        listenToGameChanges();
                     } else {
-                        // Add new player to the game
                         const newPlayer = { name: playerName, score: 0, pinkCow: false };
                         gameData.players[userId] = newPlayer;
                         await setDoc(gameRef, { players: gameData.players }, { merge: true });
-                        currentGameId = joinGameId;
-                        isHost = gameData.hostId === userId;
-                        listenToGameChanges();
                     }
+                    currentGameId = longGameId;
+                    isHost = gameData.hostId === userId;
+                    listenToGameChanges();
                 } else {
                     errorMessageEl.textContent = "Game not found. Please check the ID.";
                     errorMessageEl.classList.remove('hidden');
@@ -326,7 +424,7 @@
                     const gameData = doc.data();
                     updateUI(gameData);
                 } else {
-                    errorMessageEl.textContent = "The game has ended or was deleted.";
+                    errorMessageEl.textContent = "Game has ended or was deleted.";
                     errorMessageEl.classList.remove('hidden');
                     setTimeout(() => window.location.reload(), 3000);
                 }
@@ -336,48 +434,40 @@
         }
         
         function updateUI(gameData) {
-            showGame();
-            document.getElementById('current-game-id').textContent = currentGameId;
             isHost = gameData.hostId === userId;
+            
+            // Use the short ID for display
+            if (gameData.shortId) {
+                document.getElementById('current-game-id').textContent = gameData.shortId;
+                lobbyGameIdEl.textContent = gameData.shortId;
+            }
 
-            // Update player list in lobby
             const playerNames = Object.values(gameData.players).map(p => p.name);
             playerListEl.innerHTML = playerNames.map(name => `<li class="font-medium text-gray-700"><i class="fas fa-user-circle text-green-500 mr-2"></i>${name}</li>`).join('');
 
-            // Show/hide host-only buttons
-            if (gameData.status === 'lobby' && isHost) {
-                startGameSectionEl.classList.remove('hidden');
-            } else {
-                startGameSectionEl.classList.add('hidden');
-            }
-            if (gameData.status === 'revealing' && isHost) {
-                revealSectionEl.classList.remove('hidden');
-            } else {
-                revealSectionEl.classList.add('hidden');
-            }
-            if (gameData.status === 'revealing' && isHost) {
-                 nextRoundBtnEl.classList.remove('hidden');
-            } else {
-                nextRoundBtnEl.classList.add('hidden');
-            }
-
-            // Game status updates
             if (gameData.status === 'lobby') {
                 showLobby();
+                if (isHost && gameData.shortId) {
+                    gameIdDisplayEl.classList.remove('hidden');
+                    startGameSectionEl.classList.remove('hidden');
+                } else if (gameData.shortId) {
+                    gameIdDisplayEl.classList.add('hidden');
+                } else {
+                    gameIdDisplayEl.classList.add('hidden');
+                }
             } else if (gameData.status === 'writing') {
+                showGame();
                 currentQuestionEl.textContent = gameData.question;
                 
                 answerSectionEl.classList.remove('hidden');
                 revealSectionEl.classList.add('hidden');
                 resultsSectionEl.classList.add('hidden');
                 
-                // If I have already answered, disable input
                 if (gameData.answers[userId]) {
                     playerAnswerEl.disabled = true;
                     submitBtnEl.disabled = true;
                     submitBtnEl.textContent = "Answer Submitted!";
                     
-                    // Show reveal button if all answers are in
                     const allPlayersAnswered = Object.keys(gameData.answers).length === Object.keys(gameData.players).length;
                     if (isHost && allPlayersAnswered) {
                         revealSectionEl.classList.remove('hidden');
@@ -389,17 +479,21 @@
                     playerAnswerEl.value = "";
                 }
             } else if (gameData.status === 'revealing') {
+                showGame();
                 answerSectionEl.classList.add('hidden');
                 revealSectionEl.classList.add('hidden');
                 resultsSectionEl.classList.remove('hidden');
                 displayRoundResults(gameData);
+                if (isHost) {
+                    nextRoundBtnEl.classList.remove('hidden');
+                }
             } else if (gameData.status === 'game_over') {
                 const winnerId = Object.keys(gameData.players).find(pId => {
                     const player = gameData.players[pId];
                     return player.score >= 8 && !player.pinkCow;
                 });
-                const winnerName = gameData.players[winnerId].name;
-                showGameOver(winnerName);
+                const winnerName = gameData.players[winnerId]?.name;
+                showGameOver(winnerName || "No winner!");
             }
 
             updateScoreboard(gameData.players);
@@ -468,7 +562,6 @@
             if (!isHost) return;
             const gameRef = doc(db, `artifacts/${appId}/public/data/games/${currentGameId}`);
             
-            // Re-fetch the latest data to ensure it's not stale
             const gameSnap = await getDoc(gameRef);
             const gameData = gameSnap.data();
             
@@ -500,11 +593,9 @@
                 return answerCounts[answer.toLowerCase()] === 1;
             });
             
-            // Update scores
-            const newPlayers = JSON.parse(JSON.stringify(players)); // Deep copy
+            const newPlayers = JSON.parse(JSON.stringify(players));
             let gameWinner = null;
             
-            // Give cows to the majority
             if (!tiedMajority) {
                 Object.keys(newPlayers).forEach(pId => {
                     const playerAnswer = gameData.answers[pId];
@@ -514,7 +605,6 @@
                 });
             }
 
-            // Assign Pink Cow
             if (oddOnesOut.length === 1) {
                 const pinkCowHolderId = oddOnesOut[0];
                 Object.keys(newPlayers).forEach(pId => {
@@ -522,7 +612,6 @@
                 });
             }
             
-            // Check for winner
             Object.keys(newPlayers).forEach(pId => {
                 const player = newPlayers[pId];
                 if (player.score >= 8 && !player.pinkCow) {
@@ -545,7 +634,6 @@
             const answers = gameData.answers;
             const playerNames = gameData.players;
             
-            // Group answers by text
             const groupedAnswers = {};
             for (const pId in answers) {
                 const answerText = answers[pId];
@@ -555,7 +643,6 @@
                 groupedAnswers[answerText].push(playerNames[pId].name);
             }
             
-            // Sort by count descending
             const sortedAnswers = Object.entries(groupedAnswers).sort((a, b) => b[1].length - a[1].length);
 
             sortedAnswers.forEach(([answer, players]) => {
@@ -597,17 +684,16 @@
             });
         }
         
-        function copyUserId() {
-            const userIdText = document.getElementById('user-id').textContent;
-            navigator.clipboard.writeText(userIdText).then(() => {
-                const originalText = document.getElementById('user-id').textContent;
-                document.getElementById('user-id').textContent = 'Copied!';
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                // User notification
+                const originalText = event.target.textContent;
+                event.target.textContent = 'Copied!';
                 setTimeout(() => {
-                    document.getElementById('user-id').textContent = originalText;
+                    event.target.textContent = originalText;
                 }, 1500);
             }).catch(err => {
                 console.error('Failed to copy text: ', err);
-                // Fallback for failed copy
                 errorMessageEl.textContent = "Failed to copy. Please copy manually.";
                 errorMessageEl.classList.remove('hidden');
                 setTimeout(() => errorMessageEl.classList.add('hidden'), 3000);
@@ -633,6 +719,9 @@
             if (revealAnswersBtn) revealAnswersBtn.addEventListener('click', revealAnswers);
             if (nextRoundBtn) nextRoundBtn.addEventListener('click', startNewRound);
             if (playAgainBtn) playAgainBtn.addEventListener('click', () => window.location.reload());
+            if (copyGameIdBtnEl) copyGameIdBtnEl.addEventListener('click', () => {
+                copyToClipboard(lobbyGameIdEl.textContent);
+            });
         });
     </script>
 </body>
