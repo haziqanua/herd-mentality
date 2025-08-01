@@ -25,6 +25,13 @@
             0%, 100% { transform: translateY(-5%); }
             50% { transform: translateY(0); }
         }
+        .sudden-death-glow {
+            animation: glow 1.5s infinite alternate;
+        }
+        @keyframes glow {
+            from { box-shadow: 0 0 5px #facc15; }
+            to { box-shadow: 0 0 20px #facc15; }
+        }
     </style>
 </head>
 <body class="bg-gradient-to-br from-yellow-100 to-green-200 min-h-screen flex items-center justify-center p-4 text-gray-800">
@@ -388,6 +395,7 @@
                 question: null,
                 shortId: shortId,
                 currentPinkCowHolderId: null,
+                tiedPlayers: null,
             };
 
             try {
@@ -505,6 +513,10 @@
             } else if (gameData.status === 'writing') {
                 showGame();
                 currentQuestionEl.textContent = gameData.question;
+
+                if (gameData.tiedPlayers) {
+                    currentQuestionEl.textContent = "Sudden Death! " + gameData.question;
+                }
                 
                 if (gameData.players[userId]) {
                     answerSectionEl.classList.remove('hidden');
@@ -549,7 +561,7 @@
                 }
             } else if (gameData.status === 'game_over') {
                 showGameOver();
-                updateScoreboard(gameData.players, gameData.currentPinkCowHolderId);
+                updateScoreboard(gameData.players, gameData.currentPinkCowHolderId, gameData.tiedPlayers);
                 document.getElementById('scoreboard-title').textContent = "Final Leaderboard";
                 
                 const potentialWinners = Object.keys(gameData.players).filter(pId => {
@@ -557,19 +569,26 @@
                     return player.score >= 8 && pId !== gameData.currentPinkCowHolderId;
                 });
                 
-                if (potentialWinners.length === 1) {
-                    const winnerName = gameData.players[potentialWinners[0]].name;
-                    winnerMessageEl.textContent = `${winnerName} is the champion of the herd!`;
-                } else if (potentialWinners.length > 1) {
-                    const winnerNames = potentialWinners.map(pId => gameData.players[pId].name).join(' and ');
-                    winnerMessageEl.textContent = `It's a tie! Congratulations to ${winnerNames}!`;
-                } else {
-                    winnerMessageEl.textContent = "Game Over! The herd couldn't decide on a champion.";
+                let winnerMessage = "Game Over! The herd couldn't decide on a champion.";
+                if (gameData.tiedPlayers) {
+                    const tiedPlayersInfo = gameData.tiedPlayers.map(pId => ({ id: pId, score: gameData.players[pId].score }));
+                    const maxScore = Math.max(...tiedPlayersInfo.map(p => p.score));
+                    const newWinners = tiedPlayersInfo.filter(p => p.score === maxScore);
+
+                    if (newWinners.length === 1) {
+                        winnerMessage = `${gameData.players[newWinners[0].id].name} is the champion of the herd!`;
+                    } else if (newWinners.length > 1) {
+                        winnerMessage = `It's a tie again! The Sudden Death round continues...`;
+                    }
+                } else if (potentialWinners.length === 1) {
+                     winnerMessage = `${gameData.players[potentialWinners[0]].name} is the champion of the herd!`;
                 }
+
+                winnerMessageEl.textContent = winnerMessage;
             }
 
             if (gameData.status !== 'game_over') {
-                updateScoreboard(gameData.players, gameData.currentPinkCowHolderId);
+                updateScoreboard(gameData.players, gameData.currentPinkCowHolderId, gameData.tiedPlayers);
                 document.getElementById('scoreboard-title').textContent = "Scoreboard";
             }
         }
@@ -585,6 +604,7 @@
                     question: newQuestion,
                     answers: {},
                     round: 1,
+                    tiedPlayers: null,
                 }, { merge: true });
             } catch (e) {
                 console.error("Error starting game: ", e);
@@ -607,6 +627,8 @@
                     question: newQuestion,
                     answers: {},
                     round: gameData.round + 1,
+                    // Keep tiedPlayers if it exists
+                    tiedPlayers: gameData.tiedPlayers || null,
                 }, { merge: true });
             } catch (e) {
                 console.error("Error starting new round: ", e);
@@ -618,7 +640,7 @@
             const gameRef = doc(db, `artifacts/${appId}/public/data/games/${currentGameId}`);
             
             try {
-                await setDoc(gameRef, { status: 'game_over' }, { merge: true });
+                await setDoc(gameRef, { status: 'game_over', tiedPlayers: null }, { merge: true });
             } catch (e) {
                 console.error("Error ending game manually: ", e);
             }
@@ -682,29 +704,65 @@
             const newPlayers = JSON.parse(JSON.stringify(players));
             let newCurrentPinkCowHolderId = gameData.currentPinkCowHolderId;
             let gameWinner = false;
+            let nextTiedPlayers = null;
             
+            // Check if we are in a Sudden Death round
+            const isSuddenDeath = gameData.tiedPlayers && gameData.tiedPlayers.length > 0;
+            
+            // Apply scoring to all players
             if (!tiedMajority) {
                 Object.keys(newPlayers).forEach(pId => {
                     const playerAnswer = answers[pId];
                     if (playerAnswer && playerAnswer.toLowerCase() === majorityAnswer) {
-                        newPlayers[pId].score += 1;
+                        // Only tied players score in sudden death, otherwise all score
+                        if (!isSuddenDeath || (isSuddenDeath && gameData.tiedPlayers.includes(pId))) {
+                            newPlayers[pId].score += 1;
+                        }
                     }
                 });
             }
-
+            
+            // Assign the pink cow
             if (oddOnesOut.length === 1) {
                 const pinkCowHolderId = oddOnesOut[0];
                 newPlayers[pinkCowHolderId].pinkCowCount += 1;
                 newCurrentPinkCowHolderId = pinkCowHolderId;
             }
-            
-            const potentialWinners = Object.keys(newPlayers).filter(pId => {
-                const player = newPlayers[pId];
-                return player.score >= 8 && pId !== newCurrentPinkCowHolderId;
-            });
 
-            if (potentialWinners.length >= 1) {
-                gameWinner = true;
+            if (isSuddenDeath) {
+                // In Sudden Death, check for a clear winner among the tied players
+                const tiedPlayersScores = gameData.tiedPlayers.map(pId => ({ id: pId, score: newPlayers[pId].score }));
+                const maxScore = Math.max(...tiedPlayersScores.map(p => p.score));
+                const potentialWinners = tiedPlayersScores.filter(p => p.score === maxScore);
+
+                if (potentialWinners.length === 1) {
+                    // One player has the highest score, they win!
+                    gameWinner = true;
+                    nextTiedPlayers = null;
+                } else {
+                    // Still a tie or no one pulled ahead, continue sudden death
+                    gameWinner = false;
+                    nextTiedPlayers = potentialWinners.map(p => p.id);
+                }
+            } else {
+                // Regular game, check for a winner
+                const potentialWinners = Object.keys(newPlayers).filter(pId => {
+                    const player = newPlayers[pId];
+                    return player.score >= 8 && pId !== newCurrentPinkCowHolderId;
+                });
+                
+                if (potentialWinners.length === 1) {
+                    gameWinner = true;
+                    nextTiedPlayers = null;
+                } else if (potentialWinners.length > 1) {
+                    // Multiple players tied, start a Sudden Death round
+                    gameWinner = false;
+                    nextTiedPlayers = potentialWinners;
+                } else {
+                    // No winner, regular game continues
+                    gameWinner = false;
+                    nextTiedPlayers = null;
+                }
             }
             
             try {
@@ -712,6 +770,7 @@
                     status: gameWinner ? 'game_over' : 'revealing',
                     players: newPlayers,
                     currentPinkCowHolderId: newCurrentPinkCowHolderId,
+                    tiedPlayers: nextTiedPlayers,
                 }, { merge: true });
             } catch (e) {
                 console.error("Error revealing answers: ", e);
@@ -758,13 +817,14 @@
             });
         }
 
-        function updateScoreboard(players, currentPinkCowHolderId) {
+        function updateScoreboard(players, currentPinkCowHolderId, tiedPlayers) {
             scoreboardBodyEl.innerHTML = "";
             const sortedPlayerIds = Object.keys(players).sort((a, b) => players[b].score - players[a].score);
             
             sortedPlayerIds.forEach(pId => {
                 const player = players[pId];
                 const isCurrentPinkCowHolder = pId === currentPinkCowHolderId;
+                const isTiedPlayer = tiedPlayers && tiedPlayers.includes(pId);
                 
                 const row = document.createElement('tr');
                 let rowClasses = "border-b border-gray-200";
@@ -772,6 +832,10 @@
                 if (isCurrentPinkCowHolder) {
                     rowClasses += " bg-pink-100 font-semibold";
                 }
+                if (isTiedPlayer) {
+                    rowClasses += " sudden-death-glow";
+                }
+
                 row.className = rowClasses;
                 
                 row.innerHTML = `
